@@ -17,7 +17,17 @@ const courseSchema = new mongoose.Schema({
         required: true,
         min: 1, // Minimum limit
         max: 6  // Maximum limit
-    }
+    },
+    semester: { 
+        type: Number, 
+        required: true, 
+        min: 1, 
+        max: 8 
+    },
+    // NEW: Boolean for compulsory course status
+    isCompulsory: { 
+        type: Boolean, 
+        default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Course', courseSchema);

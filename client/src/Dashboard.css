@@ -1,3 +1,264 @@
-.dashboard-wrapper { font-family: Arial, sans-serif; background: #f4f7f6; min-height: 100vh; }
-.dashboard-content { padding: 40px; display: flex; justify-content: center; }
-.tab-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+.dashboard-wrapper { 
+    font-family: 'Segoe UI', Roboto, sans-serif; 
+    background: #f4f7f6; 
+    min-height: 100vh; 
+}
+
+.dashboard-content { 
+    padding: 40px; 
+    display: flex; 
+    justify-content: center; 
+}
+
+/* Widened the card to accommodate the table layout */
+.tab-card { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+    width: 100%; 
+    max-width: 900px; 
+}
+
+.tab-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 15px;
+}
+
+/* --- Admin Form & Buttons --- */
+.admin-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.semester-select {
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.admin-form-btns {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+/* Glowing Light Green Save Button */
+.save-btn {
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    background: #2ecc71;
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    min-width: 120px;
+}
+
+.save-btn:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5);
+}
+
+.save-btn:active {
+    transform: translateY(0);
+}
+
+/* Professional Red Exit Admin Button */
+.exit-btn {
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    background: #e74c3c;
+    color: white;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    min-width: 120px;
+}
+
+.exit-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.exit-btn:active {
+    transform: translateY(0);
+}
+
+/* --- Semester Dropdown Styling --- */
+.semester-container {
+    margin-top: 20px;
+}
+
+.semester-dropdown {
+    margin-bottom: 12px;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.semester-dropdown[open] {
+    box-shadow: 0 4px 12px rgba(0, 74, 173, 0.1);
+    border-color: #004aad;
+}
+
+.semester-summary {
+    padding: 16px 20px;
+    background: #ffffff;
+    font-weight: 700;
+    color: #2d3436;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.semester-summary:hover {
+    background: #f8f9ff;
+    color: #004aad;
+}
+
+.course-count {
+    font-size: 0.8rem;
+    background: #eef2f7;
+    color: #57606f;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* --- Table Styling --- */
+.semester-table-wrapper {
+    background: #fafbfc;
+    border-top: 1px solid #e0e6ed;
+}
+
+.semester-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.semester-table th {
+    background: #f1f4f8;
+    color: #4b5563;
+    text-align: left;
+    padding: 12px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.semester-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #edf2f7;
+    color: #2d3748;
+}
+
+.table-code {
+    background: #eef2ff;
+    color: #004aad;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* --- Compulsory Feature Styles --- */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 20px 0;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #004aad;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+}
+
+.compulsory-badge {
+    margin-left: 10px;
+    padding: 2px 8px;
+    background: #fff5f5;
+    color: #e53e3e;
+    border: 1px solid #feb2b2;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.compulsory-row {
+    background-color: #fffaf0; 
+}
+
+/* --- Action Buttons --- */
+.table-reg-btn {
+    padding: 6px 14px;
+    background: #004aad;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.table-reg-btn.enrolled {
+    background: #ebfef5;
+    color: #059669;
+    border: 1px solid #10b981;
+}
+
+.table-admin-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.table-edit-btn { background: #fff8e1; color: #b7791f; border:none; padding: 5px; border-radius: 4px; cursor: pointer;}
+.table-delete-btn { background: #fff5f5; color: #c53030; border:none; padding: 5px; border-radius: 4px; cursor: pointer;}
+
+.no-courses-msg {
+    padding: 20px;
+    text-align: center;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}

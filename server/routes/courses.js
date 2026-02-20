@@ -29,13 +29,20 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// 3. Update a course
+// 3. Update a course (Added semester field)
 router.put('/update/:id', async (req, res) => {
     try {
-        const { code, name, creditHours } = req.body;
+        // Destructure semester from request body
+        const { code, name, creditHours, semester, isCompulsory } = req.body;
         const updatedCourse = await Course.findByIdAndUpdate(
             req.params.id,
-            { code, name, creditHours: Number(creditHours) },
+            { 
+                code, 
+                name, 
+                creditHours: Number(creditHours),
+                semester: Number(semester), // Ensure semester is stored as a number
+                isCompulsory: Boolean(isCompulsory) // Ensure isCompulsory is stored as a boolean
+            },
             { new: true }
         );
         res.json(updatedCourse);
@@ -47,7 +54,6 @@ router.put('/update/:id', async (req, res) => {
 // 4. Check enrollment count before deletion
 router.get('/enrollment-count/:code', async (req, res) => {
     try {
-        // Counts how many students have this course code in their array
         const count = await Student.countDocuments({ courses: req.params.code });
         res.json({ count });
     } catch (err) {
@@ -58,16 +64,13 @@ router.get('/enrollment-count/:code', async (req, res) => {
 // 5. Delete a course (With Cascade Student Cleanup)
 router.delete('/delete/:id', async (req, res) => {
     try {
-        // First, find the course to identify the code being removed
         const course = await Course.findById(req.params.id);
         if (!course) return res.status(404).json({ message: "Course not found" });
 
         const courseCode = course.code;
 
-        // Remove the course from the Course collection
         await Course.findByIdAndDelete(req.params.id);
 
-        // Remove the course code from ALL students' courses array
         await Student.updateMany(
             { courses: courseCode },
             { $pull: { courses: courseCode } }
@@ -92,11 +95,18 @@ router.post('/drop', async (req, res) => {
     }
 });
 
-// 7. Add a new course
+// 7. Add a new course (Added semester field)
 router.post('/add', async (req, res) => {
-    const { code, name, creditHours } = req.body;
+    // Destructure semester from request body
+    const { code, name, creditHours, semester, isCompulsory } = req.body;
     try {
-        const newCourse = new Course({ code, name, creditHours });
+        const newCourse = new Course({ 
+            code, 
+            name, 
+            creditHours, 
+            semester: Number(semester), // Pass semester to the model
+            isCompulsory: Boolean(isCompulsory) // Ensure isCompulsory is stored as a boolean
+        });
         await newCourse.save();
         res.status(201).json(newCourse);
     } catch (err) {

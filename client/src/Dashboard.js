@@ -14,7 +14,15 @@ const Dashboard = () => {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
-  const [newCourse, setNewCourse] = useState({ code: '', name: '', creditHours: '' });
+  
+  // Updated state to include semester and isCompulsory
+  const [newCourse, setNewCourse] = useState({ 
+    code: '', 
+    name: '', 
+    creditHours: '', 
+    semester: '', 
+    isCompulsory: false 
+  });
 
   // CRUD States
   const [isEditing, setIsEditing] = useState(false);
@@ -24,7 +32,6 @@ const Dashboard = () => {
     const savedStudent = JSON.parse(localStorage.getItem('student'));
     
     if (savedStudent && savedStudent.id) {
-      // REFRESH DATA FROM BACKEND ON LOAD
       axios.get(`http://localhost:5000/api/auth/student/${savedStudent.id}`)
         .then(res => {
           setStudent(res.data);
@@ -37,7 +44,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // 1. AUTO-LOGOUT & TAB CLEANUP
   useEffect(() => {
     if (activeTab !== 'newCourses') {
       setIsAdmin(false); 
@@ -58,12 +64,10 @@ const Dashboard = () => {
   };
 
   const resetCourseForm = () => {
-    setNewCourse({ code: '', name: '', creditHours: '' });
+    setNewCourse({ code: '', name: '', creditHours: '', semester: '', isCompulsory: false });
     setIsEditing(false);
     setEditId(null);
   };
-
-  // --- VALIDATION & HANDLERS ---
 
   const handleAdminInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,7 +77,14 @@ const Dashboard = () => {
   };
 
   const handleCourseInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    
+    // Handle checkbox separately
+    if (type === 'checkbox') {
+        setNewCourse({ ...newCourse, [name]: checked });
+        return;
+    }
+
     if (name === 'code') {
       if (value.length <= 3) {
         if (/^[a-zA-Z]*$/.test(value)) {
@@ -90,6 +101,8 @@ const Dashboard = () => {
       if (/^[a-zA-Z\s]*$/.test(value)) {
         setNewCourse({ ...newCourse, [name]: value.toUpperCase() });
       }
+    } else {
+        setNewCourse({ ...newCourse, [name]: value });
     }
   };
 
@@ -126,22 +139,21 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       if (isEditing) {
-        // 1. Find the original course from the availableCourses array
         const originalCourse = availableCourses.find(c => c._id === editId);
 
-        // 2. Compare every field to check for changes
+        // Comparison logic including semester and isCompulsory
         const isUnchanged = 
           originalCourse.code === newCourse.code &&
           originalCourse.name === newCourse.name &&
-          Number(originalCourse.creditHours) === Number(newCourse.creditHours);
+          Number(originalCourse.creditHours) === Number(newCourse.creditHours) &&
+          Number(originalCourse.semester) === Number(newCourse.semester) &&
+          originalCourse.isCompulsory === newCourse.isCompulsory;
 
-        // 3. If nothing changed, show the popup and stop
         if (isUnchanged) {
           alert("Nothing changed! Please modify a field or click Cancel Edit.");
           return; 
         }
 
-        // 4. Proceed with update if changes were detected
         await axios.put(`http://localhost:5000/api/courses/update/${editId}`, newCourse);
         alert("Course Updated Successfully!");
       } else {
@@ -151,25 +163,20 @@ const Dashboard = () => {
       resetCourseForm();
       fetchAvailableCourses(); 
     } catch (err) {
-      alert("Operation failed: " + (err.response?.data?.message || "Check server"));
+      alert("Operation failed: " + (err.response?.data?.message || "Check server connection"));
     }
   };
 
-  // UPDATED: Enrollment-aware Delete Logic
   const handleDeleteCourse = async (course) => {
     try {
-      // 1. Check enrollment count before proceeding
       const countRes = await axios.get(`http://localhost:5000/api/courses/enrollment-count/${course.code}`);
       const count = countRes.data.count;
 
       let confirmMessage = "Are you sure you want to permanently delete this course?";
-      
-      // 2. Dynamic popup message if students are registered
       if (count > 0) {
         confirmMessage = `${count} ${count === 1 ? 'student has' : 'students have'} registered for this course. Are you still sure you want to remove it?`;
       }
 
-      // 3. Final confirmation
       if (window.confirm(confirmMessage)) {
         await axios.delete(`http://localhost:5000/api/courses/delete/${course._id}`);
         fetchAvailableCourses();
@@ -184,10 +191,13 @@ const Dashboard = () => {
   const handleEditClick = (course) => {
     setIsEditing(true);
     setEditId(course._id);
+    // Populating all fields including semester and isCompulsory
     setNewCourse({ 
       code: course.code, 
       name: course.name, 
-      creditHours: course.creditHours 
+      creditHours: course.creditHours,
+      semester: course.semester || '',
+      isCompulsory: course.isCompulsory || false
     });
     window.scrollTo(0, 0);
   };
@@ -251,16 +261,36 @@ const Dashboard = () => {
         {activeTab === 'newCourses' && (
           <div className="tab-card">
             <div className="tab-header-flex">
-              <h2>Available for Registration</h2>
+              <h2>Academic Curriculum</h2>
               {!isAdmin ? (
                 <button className="admin-access-btn" onClick={() => toggleAdminModal(true)}>Admin Access</button>
               ) : (
                 <div className="admin-panel">
                   <h3>{isEditing ? 'Update Course' : 'Add New Course'}</h3>
                   <form onSubmit={handleCourseSubmit} className="admin-form">
-                    <input type="text" name="code" placeholder="Course Code (e.g. CSC112)" value={newCourse.code} onChange={handleCourseInputChange} required />
+                    <input type="text" name="code" placeholder="Course Code" value={newCourse.code} onChange={handleCourseInputChange} required />
                     <input type="text" name="name" placeholder="Course Name" value={newCourse.name} onChange={handleCourseInputChange} required />
-                    <input type="number" placeholder="Credit hours" value={newCourse.creditHours} onChange={handleCreditChange} required />
+                    <input type="number" placeholder="Credits" value={newCourse.creditHours} onChange={handleCreditChange} required />
+                    
+                    <select name="semester" value={newCourse.semester} onChange={handleCourseInputChange} required className="semester-select">
+                      <option value="">Select Semester</option>
+                      {[1,2,3,4,5,6,7,8].map(num => (
+                        <option key={num} value={num}>Semester {num}</option>
+                      ))}
+                    </select>
+
+                    {/* Compulsory Checkbox */}
+                    <div className="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="isCompulsory" 
+                            name="isCompulsory" 
+                            checked={newCourse.isCompulsory} 
+                            onChange={handleCourseInputChange} 
+                        />
+                        <label htmlFor="isCompulsory">Compulsory Course</label>
+                    </div>
+
                     <div className="admin-form-btns">
                       <button type="submit" className="save-btn">{isEditing ? 'Update' : 'Save'}</button>
                       {isEditing && <button type="button" className="cancel-btn" onClick={resetCourseForm}>Cancel Edit</button>}
@@ -271,34 +301,65 @@ const Dashboard = () => {
               )}
             </div>
 
-            <div className="course-grid">
-              {availableCourses.length > 0 ? (
-                availableCourses.map((course) => (
-                  <div key={course._id} className="modern-course-card">
-                    <div className="course-header">
-                      <span className="course-code-tag">{course.code}</span>
-                      <span className="credit-badge">{course.creditHours} Credits</span>
-                    </div>
-                    <div className="course-body"><h3>{course.name}</h3></div>
+            <div className="semester-container">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((semNum) => {
+                const semesterCourses = availableCourses.filter(c => Number(c.semester) === semNum);
+                
+                return (
+                  <details key={semNum} className="semester-dropdown">
+                    <summary className="semester-summary">
+                      Semester {semNum} 
+                      <span className="course-count">{semesterCourses.length} Subjects</span>
+                    </summary>
                     
-                    {!isAdmin ? (
-                      <button 
-                        className={`action-btn ${student.courses?.includes(course.code) ? 'disabled-btn' : 'reg-btn'}`}
-                        onClick={() => handleCourseAction('register', course.code)}
-                        disabled={student.courses?.includes(course.code)}
-                      >
-                        {student.courses?.includes(course.code) ? 'Registered' : 'Register Now'}
-                      </button>
-                    ) : (
-                      <div className="admin-actions">
-                        <button className="edit-btn-sm" onClick={() => handleEditClick(course)}>Edit</button>
-                        {/* Pass entire course object for the enrollment check */}
-                        <button className="delete-btn-sm" onClick={() => handleDeleteCourse(course)}>Delete</button>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : <p className="empty-msg">No courses available in the database.</p>}
+                    <div className="semester-table-wrapper">
+                      {semesterCourses.length > 0 ? (
+                        <table className="semester-table">
+                          <thead>
+                            <tr>
+                              <th>Code</th>
+                              <th>Course Name</th>
+                              <th>Cr. Hrs</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {semesterCourses.map((course) => (
+                              <tr key={course._id} className={course.isCompulsory ? "compulsory-row" : ""}>
+                                <td><span className="table-code">{course.code}</span></td>
+                                <td>
+                                    {course.name}
+                                    {/* Compulsory Badge */}
+                                    {course.isCompulsory && <span className="compulsory-badge">Compulsory</span>}
+                                </td>
+                                <td>{course.creditHours}</td>
+                                <td>
+                                  {!isAdmin ? (
+                                    <button 
+                                      className={`table-reg-btn ${student.courses?.includes(course.code) ? 'enrolled' : ''}`}
+                                      onClick={() => handleCourseAction('register', course.code)}
+                                      disabled={student.courses?.includes(course.code)}
+                                    >
+                                      {student.courses?.includes(course.code) ? 'Registered' : 'Register'}
+                                    </button>
+                                  ) : (
+                                    <div className="table-admin-actions">
+                                      <button className="table-edit-btn" onClick={() => handleEditClick(course)}>Edit</button>
+                                      <button className="table-delete-btn" onClick={() => handleDeleteCourse(course)}>Delete</button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <p className="no-courses-msg">No courses assigned to this semester.</p>
+                      )}
+                    </div>
+                  </details>
+                );
+              })}
             </div>
           </div>
         )}
