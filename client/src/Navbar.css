@@ -1,0 +1,19 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #004aad;
+  color: white;
+  padding: 1rem 2rem;
+}
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+}
+.nav-links li {
+  cursor: pointer;
+  font-weight: bold;
+}
+.nav-links li:hover { color: #ffcc00; }
+.logout-btn { background: red; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }

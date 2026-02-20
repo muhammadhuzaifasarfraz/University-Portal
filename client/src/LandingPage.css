@@ -1,0 +1,23 @@
+.landing-container {
+  text-align: center;
+  margin-top: 100px;
+  font-family: Arial, sans-serif;
+}
+
+.button-group {
+  margin-top: 30px;
+}
+
+.portal-btn {
+  margin: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #004aad;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.portal-btn:hover {
+  background-color: #003070;
+}

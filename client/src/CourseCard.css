@@ -1,0 +1,152 @@
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.modern-course-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #eef0f2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modern-course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.course-code-tag {
+  background: #004aad;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.credit-badge {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #f8f9fa;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.course-body h3 {
+  margin: 10px 0;
+  color: #2d3436;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  height: 2.8em; /* Ensures consistency if names vary in length */
+  overflow: hidden;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.3s ease, transform 0.1s active;
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+}
+
+/* Admin Specific Section */
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed #dfe6e9;
+}
+
+.edit-btn-sm {
+  background-color: #ffc107;
+  color: #2d3436;
+  border: none;
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.edit-btn-sm:hover {
+  background-color: #e0a800;
+}
+
+.delete-btn-sm {
+  background-color: #ff7675; /* A slightly softer red */
+  color: #fff;
+  border: none;
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.delete-btn-sm:hover {
+  background-color: #d63031;
+}
+
+/* Admin Form layout */
+.admin-form-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.reg-btn { background: #004aad; color: white; }
+.reg-btn:hover { background: #003070; }
+
+.drop-btn { 
+  background: #fff1f1; 
+  color: #d63031; 
+  border: 1px solid #fab1a0; 
+}
+.drop-btn:hover { 
+  background: #d63031; 
+  color: white; 
+}
+
+.disabled-btn { 
+  background: #dfe6e9; 
+  color: #b2bec3; 
+  cursor: not-allowed; 
+  border: 1px solid #d1d8dd;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #636e72;
+  font-style: italic;
+  grid-column: 1 / -1;
+  padding: 40px;
+}
