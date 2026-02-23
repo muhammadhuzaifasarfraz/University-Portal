@@ -15,7 +15,6 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCreds, setAdminCreds] = useState({ username: '', password: '' });
   
-  // Updated state to include semester and isCompulsory
   const [newCourse, setNewCourse] = useState({ 
     code: '', 
     name: '', 
@@ -52,9 +51,8 @@ const Dashboard = () => {
       resetCourseForm();
     }
     
-    if (activeTab === 'newCourses') {
-      fetchAvailableCourses();
-    }
+    // Always fetch available courses to ensure mapping works for "My Courses"
+    fetchAvailableCourses();
   }, [activeTab]);
 
   const fetchAvailableCourses = () => {
@@ -78,8 +76,6 @@ const Dashboard = () => {
 
   const handleCourseInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    // Handle checkbox separately
     if (type === 'checkbox') {
         setNewCourse({ ...newCourse, [name]: checked });
         return;
@@ -140,8 +136,6 @@ const Dashboard = () => {
     try {
       if (isEditing) {
         const originalCourse = availableCourses.find(c => c._id === editId);
-
-        // Comparison logic including semester and isCompulsory
         const isUnchanged = 
           originalCourse.code === newCourse.code &&
           originalCourse.name === newCourse.name &&
@@ -191,7 +185,6 @@ const Dashboard = () => {
   const handleEditClick = (course) => {
     setIsEditing(true);
     setEditId(course._id);
-    // Populating all fields including semester and isCompulsory
     setNewCourse({ 
       code: course.code, 
       name: course.name, 
@@ -202,8 +195,23 @@ const Dashboard = () => {
     window.scrollTo(0, 0);
   };
 
+  // Academic Rules: 21 Cr limit and Drop restrictions
   const handleCourseAction = async (action, courseCode) => {
     try {
+        const targetCourse = availableCourses.find(c => c.code === courseCode);
+        
+        if (action === 'register') {
+            // Calculate current semester load
+            const semesterCredits = availableCourses
+                .filter(c => student.courses.includes(c.code) && Number(c.semester) === Number(targetCourse.semester))
+                .reduce((sum, c) => sum + Number(c.creditHours), 0);
+
+            if (semesterCredits + Number(targetCourse.creditHours) > 21) {
+                alert(`You cannot register more than 21 credit hours in Semester ${targetCourse.semester}. Current Load: ${semesterCredits}`);
+                return;
+            }
+        }
+
         const response = await axios.post(`http://localhost:5000/api/courses/${action}`, {
             studentId: student.id,
             courseCode: courseCode
@@ -211,7 +219,7 @@ const Dashboard = () => {
         const updatedStudent = { ...student, courses: response.data.courses };
         setStudent(updatedStudent);
         localStorage.setItem('student', JSON.stringify(updatedStudent));
-        alert(`Successfully ${action === 'register' ? 'registered' : 'dropped'} ${courseCode}`);
+        alert(`Successfully ${action}ed ${courseCode}`);
     } catch (err) {
         alert(err.response?.data?.message || "Operation failed");
     }
@@ -237,23 +245,65 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* My Courses Tab: Organized Semester Tables */}
         {activeTab === 'myCourses' && (
           <div className="tab-card">
-            <h2>My Enrolled Courses</h2>
-            <div className="course-grid">
-              {student.courses && student.courses.length > 0 ? (
-                student.courses.map((code) => (
-                  <div key={code} className="modern-course-card enrolled">
-                    <div className="course-header">
-                      <span className="course-code-tag">{code}</span>
+            <h2>My Academic Record</h2>
+            <div className="semester-container">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((semNum) => {
+                // Find full details for enrolled courses in this semester
+                const enrolledInSem = availableCourses.filter(
+                  c => student.courses?.includes(c.code) && Number(c.semester) === semNum
+                );
+
+                if (enrolledInSem.length === 0) return null;
+
+                const totalSemCredits = enrolledInSem.reduce((sum, c) => sum + Number(c.creditHours), 0);
+
+                return (
+                  <div key={semNum} className="student-sem-box">
+                    <div className="student-sem-header">
+                      <h3>Semester {semNum}</h3>
+                      <span className="sem-load">Semester Load: {totalSemCredits}/21 Cr.</span>
                     </div>
-                    <div className="course-body"><h3>REGISTERED SUBJECT</h3></div>
-                    <button className="action-btn drop-btn" onClick={() => handleCourseAction('drop', code)}>
-                      Drop Course
-                    </button>
+                    
+                    <div className="semester-table-wrapper">
+                      <table className="semester-table">
+                        <thead>
+                          <tr>
+                            <th>Code</th>
+                            <th>Course Name</th>
+                            <th>Cr. Hrs</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {enrolledInSem.map((course) => (
+                            <tr key={course._id}>
+                              <td><span className="table-code">{course.code}</span></td>
+                              <td>
+                                {course.name}
+                                {course.isCompulsory && <span className="compulsory-badge">Compulsory</span>}
+                              </td>
+                              <td>{course.creditHours}</td>
+                              <td>
+                                {course.isCompulsory ? (
+                                  <span className="locked-tag" title="Compulsory courses cannot be dropped">Locked</span>
+                                ) : (
+                                  <button className="table-delete-btn" onClick={() => handleCourseAction('drop', course.code)}>
+                                    Drop
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                ))
-              ) : <p className="empty-msg">You have not registered for any courses yet.</p>}
+                );
+              })}
+              {student.courses?.length === 0 && <p className="empty-msg">You have not registered for any courses yet.</p>}
             </div>
           </div>
         )}
@@ -279,15 +329,8 @@ const Dashboard = () => {
                       ))}
                     </select>
 
-                    {/* Compulsory Checkbox */}
                     <div className="checkbox-group">
-                        <input 
-                            type="checkbox" 
-                            id="isCompulsory" 
-                            name="isCompulsory" 
-                            checked={newCourse.isCompulsory} 
-                            onChange={handleCourseInputChange} 
-                        />
+                        <input type="checkbox" id="isCompulsory" name="isCompulsory" checked={newCourse.isCompulsory} onChange={handleCourseInputChange} />
                         <label htmlFor="isCompulsory">Compulsory Course</label>
                     </div>
 
@@ -329,7 +372,6 @@ const Dashboard = () => {
                                 <td><span className="table-code">{course.code}</span></td>
                                 <td>
                                     {course.name}
-                                    {/* Compulsory Badge */}
                                     {course.isCompulsory && <span className="compulsory-badge">Compulsory</span>}
                                 </td>
                                 <td>{course.creditHours}</td>

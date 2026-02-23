@@ -256,9 +256,50 @@
 .table-edit-btn { background: #fff8e1; color: #b7791f; border:none; padding: 5px; border-radius: 4px; cursor: pointer;}
 .table-delete-btn { background: #fff5f5; color: #c53030; border:none; padding: 5px; border-radius: 4px; cursor: pointer;}
 
-.no-courses-msg {
+/* --- Student "My Courses" Organization --- */
+.student-sem-box {
+    margin-bottom: 30px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.student-sem-header {
+    background: #004aad;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-sem-header h3 { margin: 0; font-size: 1.2rem; }
+
+.sem-load {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.locked-tag {
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    cursor: not-allowed;
+}
+
+.no-courses-msg, .empty-msg {
     padding: 20px;
     text-align: center;
     color: #a0aec0;
     font-size: 0.9rem;
+    font-style: italic;
 }
